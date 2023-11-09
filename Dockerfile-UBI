@@ -1,0 +1,27 @@
+FROM ubuntu:latest
+LABEL maintainer="MG <gmiller01@gmail.com>"
+
+ENV PIWIGO_VERSION="13.8.0" \
+  PIWIGO_CHECKSUM="7f6a2a796693a4ce245fd67ebdd8bf873dc6cb1a33acd567104a10347af7fe1d"
+
+COPY sources.list /etc/apt/sources.list
+
+RUN <<EOT bash
+    set -x
+    apt update && apt upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+    apt install -y curl apache2 mariadb-server php8.1 libapache2-mod-php8.1 php8.1-common php8.1-mbstring php8.1-xmlrpc php8.1-gd php8.1-xml php8.1-intl php8.1-mysql php8.1-cli php8.1-ldap php8.1-zip 
+    curl -Lo /tmp/piwigo.zip "http://piwigo.org/download/dlcounter.php?code=${PIWIGO_VERSION}" 
+    echo "${PIWIGO_CHECKSUM}  /tmp/piwigo.zip" | sha256sum -wsc -
+    adduser --system --disabled-password --home /piwigo piwigo
+    unzip /tmp/piwigo.zip -d /
+    install -d -o piwigo /piwigo/galleries /piwigo/upload
+    chown -R piwigo /piwigo/piwigo/local 
+    rm /tmp/piwigo.zip
+EOT
+
+WORKDIR /piwigo
+
+USER piwigo
+
+CMD ["php","-S","0.0.0.0:8000","-t","piwigo"]

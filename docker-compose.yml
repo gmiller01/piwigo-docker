@@ -1,0 +1,25 @@
+version: '3'
+services:
+  piwigo:
+    container_name: piwigo
+    image: <gmiller01>/piwigo-docker
+    networks:
+      - piwigo
+    ports:
+      - "8000:8000"
+    volumes:
+      - <HOST_PATH>:/piwigo/piwigo/galleries
+
+  mysql:
+    container_name: piwigo_mysql
+    image: mariadb:latest
+    networks:
+      - piwigo
+    environment:
+      MYSQL_USER: "<piwigo>"
+      MYSQL_PASSWORD: "<piwigo>"
+      MYSQL_DATABASE: "<piwigo>"
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+
+networks:
+  piwigo:
